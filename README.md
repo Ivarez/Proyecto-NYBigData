@@ -9,9 +9,9 @@
 ---
 
 ## Equipo Consultor
-* **Andrés Felipe Díaz Torres**
+* **Andrés Felipe Díaz**
 * **Luis Bueno**
-* **Iván Álvarez**
+* **Iván Álvarez Fuenmayor**
 * **Julián Díaz Castro**
 
 **Profesor:** John Jairo Corredor Franco, PhD
