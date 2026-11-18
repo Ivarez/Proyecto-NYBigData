@@ -1,0 +1,32 @@
+\section{Planteamiento de Preguntas de Negocio sobre los Datos}
+\label{sec:preguntas_negocio}
+
+Para guiar la extracción de conocimiento y el modelado en \textbf{Spark MLlib} en línea con los tres objetivos de negocio del proyecto (\textit{NYPD}, \textit{NYC DOT Vision Zero} y \textit{NYC Opportunity}), se formularon ocho preguntas directrices de negocio. Todas ellas se resuelven cuantitativa y visualmente en las Secciones \ref{sec:respuestas_preguntas} y \ref{sec:modelado_evaluacion}:
+
+\begin{enumerate}
+
+    \item \textbf{¿Cómo varía la concentración espacial y temporal de los arrestos por delitos graves (felonías) a lo largo del ciclo semanal en los distintos condados de Nueva York?}\\
+    \textit{Justificación de negocio (Objetivo 1 --- NYPD):} Dado que los registros abiertos de arrestos del NYPD informan la fecha exacta del evento con granularidad diaria (\texttt{ARREST\_DATE}), caracterizar cómo se distribuyen las felonías (\texttt{LAW\_CAT\_CD = 'F'}) entre los días de la semana (lunes a domingo y días laborales frente a fin de semana) en cada uno de los cinco condados permite identificar los picos operativos de actividad criminal y optimizar la programación semanal de patrullas y unidades tácticas.
+
+    \item \textbf{¿Existe una correlación significativa entre los condados con mayor índice de pobreza ponderada y el volumen o la tasa de arrestos por delitos menores?}\\
+    \textit{Justificación de negocio (Objetivos 1 y 3 --- NYPD y NYC Opportunity):} Busca contrastar empíricamente si las detenciones por delitos menores (\textit{misdemeanors}, \texttt{M}) se asocian a nivel de condado con la proporción de población en pobreza (\texttt{NYCgov\_Pov\_Stat = 1} ponderada con \texttt{PWGTP}), tanto en conteos absolutos como en tasas por cada $100,000$ habitantes, orientando el balance entre políticas de prevención social y control policial.
+
+    \item \textbf{En el marco de la iniciativa \textit{Vision Zero}, ¿cuáles son los factores contribuyentes y los tipos de vehículos más frecuentes en las colisiones que resultan en peatones o ciclistas heridos o fallecidos?}\\
+    \textit{Justificación de negocio (Objetivo 2 --- NYC DOT Vision Zero):} Aislar las causas conductuales (distracción, no ceder el paso, velocidad) y las tipologías vehiculares (SUV, sedanes, transporte comercial) involucradas en siniestros con actores viales vulnerables provee evidencia directa para focalizar controles de tránsito y rediseño de intersecciones.
+
+    \item \textbf{¿Qué relación guardan las condiciones socioeconómicas de desempleo y nivel educativo alcanzado con las tasas de siniestralidad vial fatal por cada $100,000$ habitantes en los cinco condados?}\\
+    \textit{Justificación de negocio (Objetivos 2 y 3 --- Vision Zero y NYC Opportunity):} Cruzar la tasa ponderada de desempleo civil (\texttt{ESR}) y la distribución de escolaridad en mayores de 25 años (\texttt{SCHL}) con la tasa de colisiones mortales por cada $100,000$ habitantes permite evaluar si la letalidad vial a escala macro de condado responde a brechas socioeconómicas o a dinámicas de exposición vial e infraestructura arterial.
+
+    \item \textbf{¿Cuáles son las cinco ``zonas calientes duales'' (\textit{hotspots}) donde coinciden geográficamente la mayor concentración de arrestos y de colisiones de tránsito fatales?}\\
+    \textit{Justificación de negocio (Objetivos 1 y 2 --- Intervención Conjunta Alcaldía):} Identificar a alta resolución espacial (cuadrículas de $0.01^\circ \times 0.01^\circ$) los cinco microterritorios que encabezan simultáneamente el percentil de detenciones y de siniestros mortales permite a la Alcaldía focalizar presupuestos integrados (iluminación, cámaras, señalización y patrullaje) con doble retorno social.
+
+    \item \textbf{¿Cuál es el perfil demográfico predominante (grupo etario, sexo y raza registrada) de los individuos arrestados según el nivel de severidad del delito (Contravención, Delito Menor y Felonía)?}\\
+    \textit{Justificación de negocio (Objetivos 1 y 3 --- NYPD y Política Social):} Caracterizar la composición demográfica de las detenciones en las categorías \texttt{V}, \texttt{M} y \texttt{F} permite identificar los grupos poblacionales con mayor incidencia en los registros policiales y diseñar programas focalizados de prevención comunitaria.
+
+    \item \textbf{¿Cómo difiere el comportamiento horario y la frecuencia de los accidentes de tránsito en un condado de altísima densidad comercial (Manhattan) frente a un condado de carácter residencial y suburbano (Staten Island)?}\\
+    \textit{Justificación de negocio (Objetivo 2 --- Gestión de Tráfico NYC DOT):} Comparar tanto el volumen horario absoluto como la curva porcentual intradiaria de siniestros entre Manhattan y Staten Island permite cuantificar el impacto de la población flotante y ajustar de forma asimétrica los planes de semaforización y agentes de tránsito.
+
+    \item \textbf{¿Qué variables (hora del día, coordenadas geográficas, tipo de vehículo y factor contribuyente) se asocian en mayor medida con la probabilidad de que un accidente vehicular resulte en fatalidad dentro de un modelo de aprendizaje automático en Spark MLlib?}\\
+    \textit{Justificación de negocio (Objetivo 2 --- Núcleo Predictivo en MLlib):} Constituye el puente entre las preguntas de negocio y la fase de modelado supervisado, permitiendo cuantificar la capacidad discriminativa de los atributos reportados en el formulario MV-104AN y el peso relativo de cada familia de predictores sobre el riesgo de muerte vial.
+
+\end{enumerate}

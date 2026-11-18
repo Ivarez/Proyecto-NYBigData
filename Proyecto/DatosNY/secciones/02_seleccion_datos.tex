@@ -1,0 +1,61 @@
+\section{Selección de los Datos a Utilizar}
+\label{sec:seleccion_datos}
+
+\subsection{Matriz Consolidada de Conjuntos de Datos Seleccionados}
+
+Para el desarrollo del proyecto se seleccionaron tres conjuntos de datos principales del portal oficial \textit{NYC Open Data}, relacionados con seguridad ciudadana, siniestralidad vial y condiciones socioeconómicas, complementados con dos fuentes externas de salud pública y meteorología. La Tabla \ref{tab:seleccion_datos} resume las características volumétricas de las fuentes principales y su alineación con los objetivos de negocio.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{p{4.2cm} p{2.8cm} r c X}
+\toprule
+\textbf{Conjunto de Datos} & \textbf{Entidad Emisora} & \textbf{Registros} & \textbf{Cols.} & \textbf{Aporte al Objetivo de Negocio} \\
+\midrule
+NYPD Arrest Data (Year to Date) & NYPD & 141,870 & 19 & Caracterización espaciotemporal de detenciones, severidad delictiva (\texttt{F}, \texttt{M}, \texttt{V}) y perfil demográfico del imputado. \\
+Motor Vehicle Collisions: Crashes & NYPD / NYC DOT & 2,305,623 & 29 & Geolocalización de siniestros, víctimas fatales y heridas por actor vial, tipología vehicular y factores contribuyentes. \\
+NYCgov Poverty Measure Data (2018) & NYC Opportunity & 68,273 & 61 & Nivel de ingreso ajustado, umbral de pobreza municipal, empleo, escolaridad y factor de expansión poblacional (\texttt{PWGTP}). \\
+\bottomrule
+\end{tabularx}
+\caption{Matriz consolidada de conjuntos de datos principales procesados en Apache Spark.}
+\label{tab:seleccion_datos}
+\end{table}
+
+\subsection{Justificación de los Conjuntos de Datos Seleccionados}
+
+\subsubsection{Seguridad Ciudadana --- NYPD Arrest Data}
+\begin{itemize}
+    \item \textbf{Identificador y fuente:} Portal oficial \textit{NYC Open Data}, identificador \texttt{uip8-fykc} \cite{nypd_arrests_ytd_2026}.
+    \item \textbf{Estructura y volumetría:} El conjunto cuenta con $19$ atributos y $141,870$ registros correspondientes a detenciones efectuadas durante el primer semestre de 2026.
+    \item \textbf{Justificación de selección:} Constituye la fuente oficial para auditar la actividad operativa del NYPD. Incluye la fecha del arresto (\texttt{ARREST\_DATE}), el distrito policial (\texttt{ARREST\_PRECINCT}), el condado (\texttt{ARREST\_BORO}), la categoría penal de la ofensa (\texttt{LAW\_CAT\_CD}), los códigos internos de clasificación (\texttt{PD\_CD}, \texttt{KY\_CD}, \texttt{OFNS\_DESC}), el perfil demográfico (\texttt{AGE\_GROUP}, \texttt{PERP\_SEX}, \texttt{PERP\_RACE}) y las coordenadas planas y geográficas (\texttt{X\_COORD\_CD}, \texttt{Y\_COORD\_CD}, \texttt{Latitude}, \texttt{Longitude}).
+    \item \textbf{Relevancia para el procesamiento en Spark:} Permite ejecutar agregaciones distribuidas por precinto, condado y cuadrícula espacial, así como imputaciones condicionadas mediante funciones de ventana sobre los códigos de delito.
+\end{itemize}
+
+\subsubsection{Siniestralidad Vial --- Motor Vehicle Collisions: Crashes}
+\begin{itemize}
+    \item \textbf{Identificador y fuente:} Portal oficial \textit{NYC Open Data}, identificador \texttt{h9gi-nx95}, suministrado conjuntamente por el NYPD y el \textit{NYC DOT} \cite{nyc_collisions_crashes_2026}.
+    \item \textbf{Estructura y volumetría:} Cuenta con $29$ atributos y $2,305,623$ registros históricos de colisiones vehiculares (actualizado en el corte final de análisis, pasando de $2,269,187$ en la exploración preliminar a $2,305,623$ registros en la corrida consolidada).
+    \item \textbf{Justificación de selección:} Concentra la totalidad de los atributos requeridos para evaluar la iniciativa \textit{Vision Zero}: fecha (\texttt{CRASH DATE}) y hora exacta (\texttt{CRASH TIME}), coordenadas geográficas (\texttt{LATITUDE}, \texttt{LONGITUDE}), desagregación de heridos y fallecidos entre peatones, ciclistas y motoristas, y hasta cinco pares de columnas para los tipos de vehículo (\texttt{VEHICLE TYPE CODE 1--5}) y factores contribuyentes (\texttt{CONTRIBUTING FACTOR VEHICLE 1--5}).
+    \item \textbf{Relevancia para el modelado:} Su volumen masivo ($>2.3$ millones de eventos) justifica plenamente el uso de cómputo distribuido en Apache Spark y provee la base histórica para entrenar y validar temporalmente los modelos de clasificación de fatalidad vial y agrupamiento territorial en MLlib.
+\end{itemize}
+
+\subsubsection{Determinantes Socioeconómicos --- NYCgov Poverty Measure Data}
+\begin{itemize}
+    \item \textbf{Identificador y fuente:} Oficina del Alcalde para la Oportunidad Económica (\textit{NYC Opportunity}), identificador \texttt{cts7-vksw} \cite{nyc_poverty_data_2018}.
+    \item \textbf{Estructura y volumetría:} Contiene $61$ atributos socioeconómicos y demográficos sobre una muestra de $68,273$ personas/unidades de observación familiar derivadas del \textit{American Community Survey} (ACS PUMS) \cite{acs_pums_dict_2018}.
+    \item \textbf{Justificación de selección:} Incorpora la medición oficial de pobreza de la Alcaldía (\texttt{NYCgov\_Pov\_Stat}), el estatus laboral (\texttt{ESR}), el máximo nivel educativo alcanzado (\texttt{SCHL}), el ingreso ajustado (\texttt{NYCgov\_Income}) y el peso muestral por persona (\texttt{PWGTP}), indispensable para expandir la muestra a la población total de cada condado y calcular tasas comparables por cada $100,000$ habitantes.
+\end{itemize}
+
+\subsection{Fuentes no Seleccionadas}
+Entre las fuentes exploradas inicialmente se evaluó el conjunto de resultados escolares \textit{SAT Results 2012}. Dicho conjunto fue descartado debido a su desfase temporal (año 2012), su reducido volumen ($478$ filas correspondientes a planteles educativos, lo que no constituye un escenario de \textit{Big Data}) y a que el nivel educativo de la población adulta por condado queda mucho mejor representado a través del atributo \texttt{SCHL} ($68,273$ registros ponderados) del conjunto \textit{NYCgov Poverty Measure Data}.
+
+\subsection{Fuentes Externas para Enriquecimiento Analítico}
+\label{subsec:fuentes_externas_seleccion}
+
+Con el propósito de enriquecer el contexto territorial y ambiental del estudio (desarrollado en detalle en la Sección \ref{sec:bonos}), se integraron dos fuentes externas adicionales:
+
+\begin{itemize}
+    \item \textbf{Contexto de Salud Pública por Vecindario (\textit{Web Scraping}):} Extracción automatizada de las tasas de incidencia de cáncer por cada $100,000$ habitantes en las $55$ áreas PUMA (\textit{Public Use Microdata Areas}) de Nueva York, publicadas por el \textit{New York State Department of Health} en su tablero oficial \textit{Rate by PUMA} \cite{nys_cancer_registry_2026}.
+    \item \textbf{Variables Meteorológicas Diarias (\textit{API Climática}):} Consumo programático de series diarias de temperatura mínima y máxima ($^\circ\text{C}$), precipitación acumulada ($\text{mm}$) y velocidad máxima del viento ($\text{m/s}$) para las coordenadas centrales de Nueva York ($\text{lat } 40.7128, \text{lon } -74.0060$) entre el 1 de enero de 2025 y el 30 de junio de 2026 ($546$ días), integrando el esquema de \textit{OpenWeather One Call API 3.0} \cite{openweather_onecall_2026} y el repositorio histórico de \textit{Open-Meteo} \cite{openmeteo_historical_2026}.
+\end{itemize}

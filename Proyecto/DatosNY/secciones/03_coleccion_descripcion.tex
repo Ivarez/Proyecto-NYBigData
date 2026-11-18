@@ -1,0 +1,128 @@
+\section{Colección y Descripción de Datos}
+\label{sec:coleccion_descripcion}
+
+\subsection{Características del Clúster de Procesamiento Distribuido}
+\label{subsec:caracteristicas_cluster}
+
+El procesamiento distribuido, la limpieza, la exploración estadística y el entrenamiento de los modelos de aprendizaje automático se ejecutaron sobre la infraestructura del clúster académico del curso (\texttt{clusterHPC}). Siguiendo el estándar de configuración establecido en el entorno de trabajo del clúster:
+
+\begin{itemize}
+    \item \textbf{Localización e inicialización del motor Spark:} La instalación de Apache Spark reside en el directorio compartido \texttt{/mnt/sda1/Cluster/Spark} del nodo principal y se enlaza al entorno de ejecución de Python mediante la librería \texttt{findspark} (\texttt{findspark.init('/mnt/sda1/Cluster/Spark')}).
+    \item \textbf{Nodo Maestro y Versión de Spark:} Las sesiones de cómputo se conectan al nodo maestro \texttt{spark://10.195.34.34:7077} ejecutando \textbf{Apache Spark v3.5.5}. La configuración de la sesión se instancia mediante \texttt{SparkConf().set('spark.ui.port', '37006')} y \texttt{SparkSession.\allowbreak builder.\allowbreak config(conf=configura).\allowbreak getOrCreate()}, exponiendo la interfaz web de monitoreo (\textit{Spark UI}) en \texttt{http://clusterHPC:37006} y registrando el contexto relacional mediante \texttt{SQLContext} y control de bitácora en nivel \texttt{ERROR} (\texttt{sparkContexto.setLogLevel('ERROR')}).
+    \item \textbf{Almacenamiento Distribuido en Hadoop HDFS:} Los archivos masivos en formato CSV se gestionan sobre el sistema de archivos distribuido de Hadoop (\texttt{/mnt/sda1/\allowbreak Cluster/Hadoop/\allowbreak bin/hadoop fs}) alojado en el \textit{NameNode} \texttt{hdfs://10.195.34.34:9000}. Esta arquitectura permite que los nodos ejecutores lean particiones de los conjuntos de datos en paralelo desde HDFS (con respaldo transparente a lectura local para pruebas de portabilidad) y mantengan en memoria caché (\texttt{.cache()}) los DataFrames depurados durante las fases iterativas de optimización de modelos en \textbf{Spark MLlib}.
+\end{itemize}
+
+\subsection{Descripción del Conjunto de Datos: NYPD Arrest Data}
+\label{subsec:desc_arrest_data}
+
+\paragraph{a. Tipo de datos:} El conjunto corresponde a datos estructurados en formato tabular (CSV), con $19$ atributos y $141,870$ registros, correspondientes a eventos discretos de arresto. La Tabla \ref{tab:tipos_arrest_data} presenta el tipo de dato de cada atributo según el diccionario oficial del dataset y su correspondencia con los tipos nativos de Spark luego de la estandarización.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Tipo de dato por atributo --- NYPD Arrest Data.}
+\label{tab:tipos_arrest_data}
+\begin{tabular}{l l l}
+\toprule
+\textbf{Atributo} & \textbf{Tipo (fuente)} & \textbf{Tipo Spark utilizado} \\
+\midrule
+ARREST\_KEY & Text / Number & IntegerType (llave primaria) \\
+ARREST\_DATE & Floating Timestamp & StringType $\rightarrow$ DateType (\texttt{fecha}) \\
+PD\_CD & Number & IntegerType \\
+PD\_DESC & Text & StringType \\
+KY\_CD & Number & IntegerType \\
+OFNS\_DESC & Text & StringType \\
+LAW\_CODE & Text & StringType \\
+LAW\_CAT\_CD & Text & StringType (\texttt{F}, \texttt{M}, \texttt{V}) \\
+ARREST\_BORO & Text & StringType (\texttt{B}, \texttt{K}, \texttt{M}, \texttt{Q}, \texttt{S}) \\
+ARREST\_PRECINCT & Number & IntegerType \\
+JURISDICTION\_CODE & Number & IntegerType \\
+AGE\_GROUP & Text & StringType \\
+PERP\_SEX & Text & StringType \\
+PERP\_RACE & Text & StringType \\
+X\_COORD\_CD & Number & IntegerType \\
+Y\_COORD\_CD & Number & IntegerType \\
+Latitude & Text / Number & StringType $\rightarrow$ DoubleType \\
+Longitude & Text / Number & StringType $\rightarrow$ DoubleType \\
+Location & Point & StringType \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{b. Significado de cada atributo:}
+\begin{itemize}
+    \item \textbf{ARREST\_KEY:} Identificador único generado aleatoriamente para cada arresto.
+    \item \textbf{ARREST\_DATE:} Fecha exacta en que se efectuó el arresto (granularidad diaria, formato \texttt{MM/dd/yyyy}).
+    \item \textbf{PD\_CD / PD\_DESC:} Código numérico y descripción de clasificación interna detallada del delito según el catálogo del NYPD.
+    \item \textbf{KY\_CD / OFNS\_DESC:} Código numérico de tres dígitos y descripción de clasificación interna general del delito (categoría más amplia que agrupa varios \texttt{PD\_CD}).
+    \item \textbf{LAW\_CODE:} Código estatutario de la ley estatal o municipal bajo la cual se realizó el arresto.
+    \item \textbf{LAW\_CAT\_CD:} Nivel de gravedad legal de la ofensa: \texttt{F} (\textit{Felony}, delito grave), \texttt{M} (\textit{Misdemeanor}, delito menor) o \texttt{V} (\textit{Violation}, contravención).
+    \item \textbf{ARREST\_BORO:} Condado donde ocurrió el arresto (\texttt{B}=Bronx, \texttt{S}=Staten Island, \texttt{K}=Brooklyn, \texttt{M}=Manhattan, \texttt{Q}=Queens).
+    \item \textbf{ARREST\_PRECINCT:} Distrito policial (\textit{precinct}) donde se registró la detención (rango $1$ a $123$).
+    \item \textbf{JURISDICTION\_CODE:} Jurisdicción responsable ($0$=Patrulla, $1$=Tránsito, $2$=Vivienda corresponden al NYPD; códigos $\ge 3$ corresponden a otras autoridades).
+    \item \textbf{AGE\_GROUP:} Rango etario del imputado (\texttt{<18}, \texttt{18-24}, \texttt{25-44}, \texttt{45-64}, \texttt{65+}).
+    \item \textbf{PERP\_SEX / PERP\_RACE:} Sexo y categoría racial registrados para el imputado.
+    \item \textbf{X\_COORD\_CD / Y\_COORD\_CD:} Coordenadas planas en el sistema \textit{New York State Plane Coordinate System} (NAD 83, unidades en pies).
+    \item \textbf{Latitude / Longitude / Location:} Coordenadas geográficas en el sistema de referencia WGS 1984 (grados decimales) y punto geocodificado.
+\end{itemize}
+
+\paragraph{c. Descripción general del contenido:} El conjunto documenta cada arresto efectuado por el NYPD durante el primer semestre de 2026 (enero a junio de 2026), integrando tipología delictiva, ubicación espacial y demografía del detenido \cite{nypd_arrests_ytd_2026}.
+
+\subsection{Descripción del Conjunto de Datos: Motor Vehicle Collisions --- Crashes}
+\label{subsec:desc_collisions}
+
+\paragraph{a. Tipo de datos:} Conjunto estructurado en formato tabular (CSV), con $29$ atributos y $2,305,623$ registros en la lectura cruda ($2,305,355$ registros tras la depuración de integridad), donde cada fila representa un siniestro vial reportado.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Tipo de dato por atributo --- Motor Vehicle Collisions: Crashes.}
+\label{tab:tipos_collisions}
+\begin{tabularx}{\linewidth}{X l l}
+\toprule
+\textbf{Atributo} & \textbf{Tipo (fuente)} & \textbf{Tipo Spark utilizado} \\
+\midrule
+CRASH DATE & Floating Timestamp & StringType $\rightarrow$ DateType (\texttt{fecha}) \\
+CRASH TIME & Text & StringType $\rightarrow$ IntegerType (\texttt{hora} $0\text{--}23$) \\
+BOROUGH & Text & StringType \\
+ZIP CODE & Text & StringType \\
+LATITUDE / LONGITUDE & Text / Number & StringType $\rightarrow$ DoubleType (\texttt{lat}, \texttt{lon}) \\
+LOCATION & Location & StringType \\
+ON/CROSS/OFF STREET NAME & Text & StringType \\
+NUMBER OF PERSONS/PEDESTRIANS/CYCLIST/MOTORIST INJURED-KILLED (8 columnas) & Number & StringType $\rightarrow$ IntegerType (\texttt{try\_cast}) \\
+CONTRIBUTING FACTOR VEHICLE 1--5 & Text & StringType \\
+COLLISION\_ID & Text / Number & StringType (llave primaria depurada) \\
+VEHICLE TYPE CODE 1--5 & Text & StringType \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{b. Significado de cada atributo:}
+\begin{itemize}
+    \item \textbf{CRASH DATE / CRASH TIME:} Fecha y hora (en formato de 24 horas \texttt{H:mm}) de ocurrencia de la colisión.
+    \item \textbf{BOROUGH / ZIP CODE:} Condado y código postal administrativo donde ocurrió el siniestro.
+    \item \textbf{LATITUDE / LONGITUDE / LOCATION:} Coordenadas geográficas del siniestro en grados decimales (WGS 1984).
+    \item \textbf{ON STREET NAME / CROSS STREET NAME / OFF STREET NAME:} Vía principal, intersección transversal más cercana o dirección fuera de calzada.
+    \item \textbf{NUMBER OF PERSONS / PEDESTRIANS / CYCLIST / MOTORIST INJURED / KILLED:} Ocho atributos numéricos con el conteo de personas heridas y fallecidas, tanto en total (\texttt{PERSONS}) como desagregado por actor vial (peatón, ciclista y motorista).
+    \item \textbf{CONTRIBUTING FACTOR VEHICLE 1--5:} Factores causales o contribuyentes reportados para cada uno de los hasta cinco vehículos involucrados.
+    \item \textbf{COLLISION\_ID:} Identificador único de registro de la colisión (llave primaria de la tabla \textit{Crashes}).
+    \item \textbf{VEHICLE TYPE CODE 1--5:} Categoría declarada para cada vehículo involucrado en el choque.
+\end{itemize}
+
+\paragraph{c. Descripción general del contenido:} Documenta los accidentes de tránsito reportados policialmente en la Ciudad de Nueva York (formulario oficial MV-104AN), obligatorio cuando existen personas lesionadas, fallecidas o daños materiales iguales o superiores a USD 1,000 \cite{nyc_collisions_crashes_2026}.
+
+\subsection{Descripción del Conjunto de Datos: NYCgov Poverty Measure Data}
+\label{subsec:desc_poverty}
+
+\paragraph{a. Tipo de datos:} Microdatos estructurados en formato tabular (CSV), derivados de la \textit{American Community Survey} (ACS) del U.S. Census Bureau y ajustados por \textit{NYC Opportunity}, con $61$ atributos y $68,273$ registros a nivel de persona/unidad de pobreza \cite{nyc_poverty_data_2018, acs_pums_dict_2018}.
+
+\paragraph{b. Significado de los atributos principales (agrupados por dimensión):}
+\begin{itemize}
+    \item \textbf{Identificadores y factores de expansión:} \texttt{SERIALNO}, \texttt{SPORDER} (identificador de hogar y de persona), \texttt{PWGTP} y \texttt{WGTP} (pesos muestrales de persona y de vivienda en \texttt{DoubleType}), \texttt{Povunit\_ID} y \texttt{Povunit\_Rel}.
+    \item \textbf{Demografía y territorio:} \texttt{AGEP} (edad), \texttt{SEX}, \texttt{CIT} y \texttt{CitizenStatus}, \texttt{MAR}/\texttt{MSP} (estado civil), \texttt{DIS} (discapacidad), \texttt{LANX}/\texttt{ENG} (idioma en el hogar y dominio del inglés), \texttt{Ethnicity}, \texttt{AgeCateg}, \texttt{Boro} (código numérico del condado: $1$=Bronx, $2$=Brooklyn, $3$=Manhattan, $4$=Queens, $5$=Staten Island), \texttt{HHT}, \texttt{NP} y \texttt{FamType\_PU}.
+    \item \textbf{Educación y mercado laboral:} \texttt{SCH}/\texttt{SCHG}/\texttt{SCHL}/\texttt{EducAttain} (asistencia escolar y grado educativo detallado en escala $1\text{--}24$), \texttt{ESR} (estatus de empleo: $1\text{--}2$ ocupado, $3$ desempleado, $4\text{--}5$ fuerzas armadas, $6$ fuera de la fuerza laboral), \texttt{WKW}/\texttt{WKHP} (semanas y horas trabajadas), \texttt{FTPTWork}, \texttt{TotalWorkHrs\_PU}, \texttt{JWTR} (medio de transporte al trabajo) y \texttt{TEN} (tenencia de vivienda).
+    \item \textbf{Ingresos y gastos ajustados (\texttt{\_adj} y \texttt{EST\_}):} Componentes de ingreso familiar (\texttt{WAGP\_adj}, \texttt{SEMP\_adj}, \texttt{INTP\_adj}, \texttt{RETP\_adj}, \texttt{SSIP\_adj}, \texttt{SSP\_adj}, \texttt{PA\_adj}, \texttt{OI\_adj}, \texttt{RNTP\_adj}, \texttt{MRGP\_adj}, \texttt{PreTaxIncome\_PU}) y estimaciones municipales de gasto e impuestos (\texttt{EST\_Housing}, \texttt{EST\_Childcare}, \texttt{EST\_Commuting}, \texttt{EST\_MOOP}, \texttt{EST\_Nutrition}, \texttt{EST\_EITC}, \texttt{EST\_FICAtax}, \texttt{EST\_IncomeTax}, \texttt{EST\_HEAP}), convertidos de formato monetario local a \texttt{DoubleType}.
+    \item \textbf{Indicadores de pobreza:} \texttt{NYCgov\_Income} (ingreso disponible bajo metodología de la Alcaldía), \texttt{NYCgov\_Threshold} (umbral de pobreza ajustado por costo de vida local), \texttt{NYCgov\_Pov\_Stat} ($1$=en pobreza, $2$=no pobre), \texttt{Off\_Pov\_Stat}/\texttt{Off\_Threshold} (medición federal oficial) y \texttt{EST\_PovGap}/\texttt{EST\_PovGapIndex}.
+\end{itemize}
+
+\paragraph{c. Descripción general del contenido:} Provee la línea base socioeconómica de referencia (corte 2018) para estimar de forma ponderada la población total, la tasa de pobreza municipal, la tasa de desempleo civil y la estructura educativa de cada uno de los cinco condados de Nueva York \cite{nyc_poverty_data_2018}.

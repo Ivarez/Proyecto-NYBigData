@@ -1,0 +1,45 @@
+\section{Conclusiones y Recomendaciones Ejecutivas para Nueva York}
+\label{sec:conclusiones_recomendaciones}
+
+Al culminar las seis fases de la metodología \textbf{CRISP-DM} sobre el clúster de \textbf{Apache Spark} (\texttt{spark://10.195.34.34:7077}) y \textbf{Hadoop HDFS} (\texttt{hdfs://10.195.34.34:9000}), el equipo consultor presenta a los tomadores de decisiones del Estado y la Alcaldía de Nueva York las conclusiones estratégicas y el plan de acción respaldado por los hallazgos empíricos del proyecto:
+
+\subsection{Síntesis de Hallazgos Estratégicos}
+
+\begin{enumerate}
+    \item \textbf{La estandarización poblacional transforma el mapa de prioridades de seguridad pública:}
+    Analizar únicamente conteos absolutos distorsiona la asignación de recursos hacia Brooklyn ($42,877$ arrestos). Al normalizar mediante los pesos muestrales \texttt{PWGTP} de \textit{NYCgov Poverty Measure}, \textbf{El Bronx emerge como el condado con mayor presión per cápita de detenciones ($2,354.5$ arrestos Totales y $1,388.1$ por delitos menores por cada $100,000$ habitantes)}, coincidiendo con la tasa más alta de pobreza ponderada ($27.12\%$) y de desempleo civil ($9.56\%$) de la metrópoli.
+
+    \item \textbf{Los arrestos por delitos graves (\textit{Felonies}) siguen un ciclo intrasemanal altamente concentrado entre martes y jueves:}
+    Sobre los $55,651$ arrestos por felonías del primer semestre de 2026, más del $53\%$ ocurre exclusivamente entre martes y jueves ($29,540$ detenciones), con un desfase territorial claro del día pico: martes en el Bronx ($18.85\%$), miércoles en Brooklyn ($18.14\%$) y Queens ($18.84\%$), y jueves en Manhattan ($18.28\%$) y Staten Island ($18.10\%$).
+
+    \item \textbf{Los peatones aportan casi la mitad de las muertes viales y las SUV lideran los siniestros contra vulnerables:}
+    Sobre el histórico depurado de $2,305,355$ colisiones ($779,372$ heridos y $3,746$ fallecidos), los peatones representan el $49.3\%$ de todas las víctimas fatales ($1,847$ fallecidos). En el primer semestre de 2026, la distracción del conductor ($1,686$ choques) y no ceder el paso ($1,243$) fueron los principales factores en siniestros con peatones y ciclistas, mientras que las camionetas SUV (\texttt{STATION WAGON/SPORT UTILITY VEHICLE}, $1,741$) superaron a los sedanes ($1,554$) como el vehículo más involucrado.
+
+    \item \textbf{Identificación microterritorial de 5 ``Zonas Calientes Duales'' y 2 Perfiles K-Means:}
+    El cruce espacial en cuadrículas de $0.01^\circ \times 0.01^\circ$ identificó cinco zonas críticas donde convergen el máximo percentil de arrestos y colisiones mortales, encabezadas por \textbf{Bronx Central} $(40.845^\circ, -73.905^\circ)$ con $1,584$ arrestos y $2$ colisiones fatales ($\text{índice} = 0.9674$) y \textbf{Brooklyn Este} $(40.675^\circ, -73.905^\circ)$ con $1,107$ arrestos y $2$ colisiones fatales ($\text{índice} = 0.9511$). Complementariamente, el modelo \textbf{K-Means ($k=2, \text{Silhouette}=0.4734$)} segmentó las $699$ zonas activas de la ciudad en un \textbf{Grupo 0 de alta prioridad ($351$ zonas)} que concentra $10.4$ veces más arrestos promedio ($366.0$ vs. $35.3$) y el doble de afectación a peatones y ciclistas ($17.3\%$ vs. $8.7\%$) que el \textbf{Grupo 1 ($348$ zonas)}.
+
+    \item \textbf{Superioridad de arquitecturas no lineales (MLP) sobre modelos lineales para modelar el riesgo fatal:}
+    Mientras que la Regresión Logística ponderada ($\texttt{regParam}=1.00$) alcanzó una $\text{AUROC} = 0.5397$ en la prueba temporal de 2026 e identificó la alta influencia relativa de defectos de iluminación vial ($\beta = +0.4098$) y de la franja nocturna, el \textbf{Perceptrón Multicapa de tres capas ocultas ($64\text{--}32\text{--}16$, $\texttt{maxIter}=50$)} elevó la discriminación a $\text{AUROC} = 0.6020$ y redujo en un $63.8\%$ los falsos positivos, demostrando el valor de capturar interacciones espacio-temporales no lineales en \textbf{Spark MLlib}.
+\end{enumerate}
+
+\subsection{Hoja de Ruta y Recomendaciones para los Tomadores de Decisiones}
+
+Con base en los hallazgos anteriores y cerrando la sexta fase (Despliegue) de la metodología CRISP-DM, la Tabla \ref{tab:recomendaciones_ejecutivas} estructura el plan de acción interinstitucional propuesto para la Alcaldía de Nueva York, articulando las intervenciones del NYPD, el NYC DOT (\textit{Vision Zero}), \textit{NYC Opportunity} y el Departamento de Salud estatal.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{1.3}
+\caption{Plan de acción interinstitucional recomendado para la Alcaldía y el Estado de Nueva York.}
+\label{tab:recomendaciones_ejecutivas}
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{2.7cm} >{\raggedright\arraybackslash}p{3.4cm} X}
+\toprule
+\textbf{Entidad Responsable} & \textbf{Eje de Intervención} & \textbf{Acción Concreta Basada en la Evidencia del Proyecto} \\
+\midrule
+\textbf{Alcaldía de NYC / NYPD + NYC DOT} & Intervención conjunta en las 5 Zonas Calientes Duales y Clúster 0 & Priorizar inversión integrada (modernización de alumbrado público, atendiendo el coeficiente $+0.4098$ de \texttt{OTHER LIGHTING DEFECTS}, cámaras de control y patrullaje) en las cuadrículas $(40.845^\circ, -73.905^\circ)$ en el Bronx y $(40.675^\circ, -73.905^\circ)$ en Brooklyn, así como en las $351$ celdas del \textbf{Grupo 0 de K-Means}. \\
+\textbf{NYPD (\textit{CompStat})} & Reprogramación dinámica semanal por condado & Escalonar los turnos de unidades tácticas y cumplimiento judicial entre martes y jueves ($53.1\%$ de las felonías): refuerzo los martes en el Bronx (precintos 40, 44, 46, 47, 52), miércoles en Brooklyn y Queens (precintos 73, 75, 103, 110) y jueves en Manhattan (precinto 14). \\
+\textbf{NYC DOT (\textit{Vision Zero})} & Protección de vulnerables y gestión horaria asimétrica & Instalar intervalos peatonales adelantados (LPI) y reductores de velocidad de giro en intersecciones del Clúster 0 para mitigar \texttt{FAILURE TO YIELD} ($1,243$ casos) y colisiones de SUV ($1,741$). Ajustar semáforos inteligentes en Staten Island a los picos pendulares de 07:00--08:00 h y 15:00 h, y en Manhattan a la meseta de 12:00--18:00 h y franja nocturna 21:00--01:00 h, intensificando campañas preventivas en meses cálidos ($r = +0.469$ entre temperatura y heridos). \\
+\textbf{NYC Opportunity \& NYS Health} & Focalización social y enriquecimiento del registro MV-104AN & Sustituir enfoques puramente punitivos en delitos menores (\texttt{M}) del Bronx ($27.12\%$ pobreza, $9.56\%$ desempleo) por programas de empleo juvenil para el grupo etario 18--44 años, y fortalecer el tamizaje oncológico preventivo en los 3 PUMA de Staten Island ($514.7$ casos / 100k hab.). Incorporar en el formulario MV-104AN la velocidad límite de la vía y condiciones de iluminación para elevar el poder predictivo de los modelos de MLlib. \\
+\bottomrule
+\end{tabularx}
+\end{table}

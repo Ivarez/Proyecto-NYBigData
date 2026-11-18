@@ -1,0 +1,161 @@
+\documentclass[11pt,a4paper]{article}
+
+% --- Paquetes de Idioma y Codificación ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% --- Geometría de Página y Márgenes ---
+\usepackage[top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm]{geometry}
+
+% --- Paquetes Matemáticos y Tipográficos ---
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{csquotes}
+
+% --- Rutas de Imágenes ---
+\graphicspath{{imagenes/}}
+
+% --- Definición de Colores para Enlaces ---
+\definecolor{myblue}{RGB}{0,50,150}
+\definecolor{mygreen}{RGB}{0,120,40}
+\definecolor{myurl}{RGB}{0,80,180}
+
+% --- Enlaces y Referencias ---
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=myblue,
+    citecolor=mygreen,
+    urlcolor=myurl
+}
+
+% --- Bibliografía Estándar con Cite ---
+\usepackage{cite}
+
+% --- Parámetros de Control de Flotantes (Evita páginas con huecos o flotantes centrados) ---
+\renewcommand{\topfraction}{0.85}       % Permite que tablas/figuras ocupen hasta el 85% superior
+\renewcommand{\bottomfraction}{0.75}    % Permite hasta el 75% en la parte inferior
+\renewcommand{\textfraction}{0.10}      % Solo requiere 10% de texto mínimo por página
+\renewcommand{\floatpagefraction}{0.60}
+\makeatletter
+\setlength{\@fptop}{0pt}                % Si queda una tabla sola, la pega arriba (elimina el hueco superior)
+\setlength{\@fpbot}{0pt plus 1fil}      % El espacio sobrante va al pie de la página
+\makeatother
+
+% --- Configuración de Encabezados y Pies de Página ---
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\small Procesamiento de Datos a Gran Escala | Entrega Final}
+\lhead{\small Consultoría Analítica Ciudad de NY}
+\rfoot{\thepage}
+
+\begin{document}
+
+% ==========================================
+% PORTADA INSTITUCIONAL (Página Completa)
+% ==========================================
+\begin{titlepage}
+    \centering
+    \vspace*{0.2cm}
+    
+    % 1. TÍTULO DEL PROYECTO CON LÍNEAS
+    \rule{\linewidth}{0.5mm}\\[0.35cm]
+    {\LARGE\textbf{Proyecto: Procesamiento de Alto Volumen de Datos}}\\[0.25cm]
+    {\Large\textbf{Diagnóstico Territorial, Criminalidad y Accidentalidad Vial en la Ciudad de Nueva York}}\\[0.2cm]
+    {\large\textit{Entrega Final: Preparación de Datos, Modelado y Presentación de Resultados}}\\[0.25cm]
+    \rule{\linewidth}{0.5mm}
+    
+    \vfill
+    
+    % 2. LOGO EN EL CENTRO
+    \includegraphics[height=5cm, keepaspectratio]{logoPUJ.png}\\[0.42cm]
+    
+    % 3. UNIVERSIDAD, FACULTAD Y MATERIA
+    {\Large\textbf{PONTIFICIA UNIVERSIDAD JAVERIANA}}\\[0.15cm]
+    {\large Facultad de Ingeniería $\cdot$ Departamento de Ingeniería de Sistemas}\\[0.15cm]
+    {\large Procesamiento de Datos a Gran Escala}
+    
+    \vfill
+    
+    % 4. EQUIPO CONSULTOR Y PROFESOR
+    \begin{minipage}{0.85\textwidth}
+        \begin{flushleft} \large
+            \textbf{Equipo Consultor:}\\
+            $\bullet$ Andrés Felipe Díaz Torres\\
+            $\bullet$ Luis Bueno\\
+            $\bullet$ Iván Álvarez\\
+            $\bullet$ Julián Díaz Castro\\[0.4cm]
+            \textbf{Profesor:}\\
+            John Jairo Corredor Franco, PhD
+        \end{flushleft}
+    \end{minipage}
+    
+    \vfill
+    % 5. CIUDAD Y FECHA
+    {\large Bogotá D.C., Colombia\\ Noviembre de 2026}
+    \vspace*{0.2cm}
+\end{titlepage}
+
+% ==========================================
+% PÁGINA PRELIMINAR: RESUMEN EJECUTIVO E ÍNDICE
+% ==========================================
+\pagenumbering{roman}
+
+\begin{abstract}
+\noindent El presente documento consolida el entregable final del proyecto de consultoría en analítica y procesamiento de datos a gran escala para los tomadores de decisiones del Estado y la Ciudad de Nueva York, desarrollado íntegramente bajo la metodología estándar de la industria \textbf{CRISP-DM} (\textit{Cross-Industry Standard Process for Data Mining}) \cite{crisp_dm_2000}. Sobre una infraestructura distribuida compuesta por el clúster institucional de \textbf{Apache Spark v3.5.5} (\texttt{spark://10.195.34.34:7077}) y el sistema de archivos distribuido \textbf{Hadoop HDFS} (\texttt{hdfs://10.195.34.34:9000}), se integraron tres fuentes masivas del portal \textit{NYC Open Data}: registros policiales de arrestos del NYPD ($141,870$ eventos), colisiones vehiculares reportadas conjuntamente por el NYPD y el NYC DOT ($2,305,623$ siniestros históricos) y microdatos socioeconómicos de \textit{NYCgov Poverty Measure} ($68,273$ observaciones ponderadas), complementadas mediante \textit{web scraping} de tasas de incidencia de cáncer por vecindario PUMA (\textit{NYS Department of Health}) y series meteorológicas diarias por API (\textit{OpenWeather / Open-Meteo}).
+
+En la primera parte del informe (Fases I y II de CRISP-DM) se formaliza el entendimiento del negocio para el NYPD, la iniciativa \textit{Vision Zero} del NYC DOT y \textit{NYC Opportunity}, junto con la arquitectura del clúster, la descripción de esquemas, nueve análisis exploratorios distribuidos y el diagnóstico de calidad de datos. En la segunda parte (Fases III, IV, V y VI de CRISP-DM) se culmina la preparación de datos aplicando cuatro reglas de filtrado y seis transformaciones distribuidas justificadas técnica y operativamente (depurando $2,305,355$ colisiones válidas e imputando jerárquicamente variables categóricas y nulos estructurales); se responden cuantitativa y visualmente las ocho preguntas de negocio formuladas en la primera entrega; y se diseñan, entrenan y evalúan pipelines de aprendizaje automático en \textbf{Spark MLlib} \cite{meng2016mllib}. En particular, se implementa un modelo supervisado de \textbf{Regresión Logística} ponderada con partición temporal estricta (entrenamiento 2024, validación 2025 y prueba en el primer semestre de 2026) para caracterizar los factores asociados con la fatalidad vial ($\text{AUROC} = 0.5397$, $\text{AUPRC} = 0.0042$ frente a una prevalencia de $0.0025$), un modelo no supervisado de agrupamiento espacial \textbf{K-Means} sobre $699$ cuadrículas urbanas de $0.01^\circ \times 0.01^\circ$ que identifica dos perfiles territoriales diferenciados ($\text{Silhouette} = 0.4734$), y un modelo adicional de aprendizaje profundo mediante un \textbf{Perceptrón Multicapa (\texttt{MultilayerPerceptronClassifier})} de tres capas ocultas ($64\text{--}32\text{--}16$) que captura interacciones no lineales y eleva la capacidad de discriminación en prueba a $\text{AUROC} = 0.6020$ reduciendo en un $63.8\%$ los falsos positivos. Finalmente, los hallazgos se traducen en recomendaciones accionables de política pública para la focalización territorial de recursos en Nueva York.
+\end{abstract}
+
+\tableofcontents
+
+% ==========================================
+% CUERPO DEL INFORME (Inicia Conteo de Páginas)
+% ==========================================
+\clearpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+% --- SECCIONES MODULARES: ENTREGA 1 (FASES I Y II CRISP-DM) ---
+\input{secciones/01_entendimiento_negocio}
+
+\input{secciones/02_seleccion_datos}
+
+\input{secciones/03_coleccion_descripcion}
+
+\input{secciones/04_exploracion_datos}
+
+\input{secciones/05_reporte_calidad}
+
+\input{secciones/06_preguntas_negocio}
+
+% --- SECCIONES MODULARES: ENTREGA FINAL (FASES III, IV, V Y VI CRISP-DM) ---
+\input{secciones/07_limpieza_transformacion}
+
+\input{secciones/08_bonos}
+
+\input{secciones/09_respuestas_preguntas_negocio}
+
+\input{secciones/10_modelado_evaluacion_mllib}
+
+\input{secciones/11_bono_aprendizaje_profundo}
+
+\input{secciones/12_conclusiones_recomendaciones}
+
+\newpage
+% ==========================================
+% REFERENCIAS BIBLIOGRÁFICAS
+% ==========================================
+\bibliographystyle{IEEEtran}
+\bibliography{referencias}
+
+\end{document}

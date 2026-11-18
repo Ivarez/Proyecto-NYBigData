@@ -1,0 +1,46 @@
+\section{Reporte de Calidad de Datos}
+\label{sec:reporte_calidad}
+
+La evaluación rigurosa de la calidad de los datos garantiza que las respuestas a las preguntas de negocio y los modelos de aprendizaje automático en \textbf{Spark MLlib} no sufran sesgos por registros corruptos, duplicados o codificaciones inconsistentes. A continuación se sintetiza el diagnóstico de valores faltantes e inconsistencias detectadas en el clúster de Apache Spark y la estrategia técnica adoptada para cada caso.
+
+\subsection{Conteo Distribuido de Valores Faltantes e Inconsistencias}
+\label{subsec:conteo_faltantes}
+
+\paragraph{A. Seguridad Ciudadana: NYPD Arrest Data ($141,870$ registros).}
+Presenta una completitud superior al $99\%$ en sus atributos principales ($0\%$ de nulos en \texttt{ARREST\_KEY}, \texttt{ARREST\_DATE}, \texttt{ARREST\_BORO}, \texttt{ARREST\_PRECINCT}, \texttt{AGE\_GROUP}, \texttt{PERP\_SEX} y \texttt{PERP\_RACE}):
+\begin{itemize}
+    \item \textbf{\texttt{LAW\_CAT\_CD} (Nivel de gravedad de la ofensa):} $869$ valores nulos o equivalentes a texto vacío/\texttt{'(null)'} ($0.61\%$), a los que se suman $426$ registros con el código inválido \texttt{'9'} y $99$ registros con el código \texttt{'I'} (infracciones no clasificadas en \texttt{F/M/V}), totalizando $1,394$ registros ($0.98\%$) que requieren estandarización.
+    \item \textbf{\texttt{PD\_DESC}, \texttt{OFNS\_DESC} y \texttt{KY\_CD}:} $24$ nulos cada uno ($0.02\%$).
+    \item \textbf{\texttt{PD\_CD} y \texttt{LAW\_CODE}:} $5$ nulos cada uno ($0.00\%$).
+    \item \textbf{Coordenadas planas (\texttt{X\_COORD\_CD}, \texttt{Y\_COORD\_CD}):} $9$ registros con coordenadas fuera del rango válido del plano estatal de Nueva York (valores truncados como $-74$ y $40$).
+\end{itemize}
+
+\paragraph{B. Siniestralidad Vial: Motor Vehicle Collisions ($2,305,623$ registros crudos).}
+Presenta tres familias diferenciadas de problemas de calidad:
+\begin{itemize}
+    \item \textbf{Nulos estructurales en vehículos secundarios (3, 4 y 5):} \texttt{VEHICLE TYPE CODE 5} ($2,295,439$ nulos, $99.56\%$), \texttt{CONTRIBUTING FACTOR VEHICLE 5} ($2,295,099$, $99.54\%$), \texttt{VEHICLE TYPE CODE 4} ($2,268,679$, $98.40\%$), \texttt{CONTRIBUTING FACTOR VEHICLE 4} ($2,267,226$, $98.33\%$), \texttt{VEHICLE TYPE CODE 3} ($2,145,137$, $93.04\%$) y \texttt{CONTRIBUTING FACTOR VEHICLE 3} ($2,138,209$, $92.74\%$). En el vehículo 2 los nulos son del $20.62\%$ y $16.24\%$, y en el vehículo 1 apenas del $0.77\%$ ($17,718$) y $0.36\%$ ($8,228$).
+    \item \textbf{Faltantes de geocodificación y etiquetas administrativas:} \texttt{CROSS STREET NAME} ($81.85\%$), \texttt{OFF STREET NAME} ($38.48\%$), \texttt{ZIP CODE} ($701,201$ nulos, $30.41\%$), \texttt{BOROUGH} ($674,935$ nulos, $29.27\%$) y \texttt{LATITUDE}/\texttt{LONGITUDE} ($240,776$ nulos, $10.44\%$, más $8,566$ puntos con coordenadas $(0,0)$ o fuera del rectángulo geográfico de NYC).
+    \item \textbf{Registros corruptos, conteos incoherentes y separador decimal local:} $268$ registros presentan desplazamientos de columnas, conteos nulos en \texttt{NUMBER OF PERSONS KILLED} ($31$) o \texttt{INJURED} ($18$), llaves duplicadas o sumas de subcategorías mayores al total de víctimas; además, las columnas \texttt{LATITUDE} y \texttt{LONGITUDE} almacenan decimales con coma (\texttt{'40,62179'}).
+\end{itemize}
+
+\paragraph{C. Determinantes Socioeconómicos: NYCgov Poverty Measure ($68,273$ registros).}
+La ausencia de datos obedece al diseño de salto lógico (\textit{skip logic}) del cuestionario censal ACS:
+\begin{itemize}
+    \item \textbf{\texttt{ENG} (Dominio del inglés):} $37,557$ nulos ($55.01\%$, personas que solo hablan inglés en casa).
+    \item \textbf{\texttt{JWTR} (Medio de transporte al trabajo):} $34,956$ nulos ($51.20\%$, personas que no trabajaron la semana previa).
+    \item \textbf{\texttt{WKW} (Semanas trabajadas):} $31,394$ nulos ($45.98\%$).
+    \item \textbf{\texttt{ESR} (Estatus de empleo) y \texttt{MSP} (Estado civil):} $11,798$ ($17.28\%$) y $11,021$ ($16.14\%$) nulos (menores de 15 o 16 años a quienes no aplica la pregunta).
+    \item \textbf{\texttt{LANX} ($5.17\%$) y \texttt{SCHL}/\texttt{EducAttain} ($3.09\%$):} Menores de 3 o 5 años fuera del universo escolar.
+\end{itemize}
+
+\subsection{Estrategia Técnica Implementada para el Tratamiento de Calidad}
+\label{subsec:tecnicas_faltantes}
+
+Descartar por completo cualquier fila con algún campo nulo (\textit{list-wise deletion}) habría eliminado más del $99\%$ de las colisiones vehiculares y más del $55\%$ de la encuesta socioeconómica. Por ello, en el pipeline de PySpark (documentado y ejecutado en la Sección \ref{sec:limpieza_transformacion}) se adoptaron cuatro mecanismos específicos:
+
+\begin{enumerate}
+    \item \textbf{Validación Geoespacial por Caja Delimitadora y Malla Regular de $0.01^\circ \times 0.01^\circ$:} Dado que el $29.27\%$ de las colisiones carece de la etiqueta \texttt{BOROUGH} pero el $89.19\%$ ($2,056,013$ siniestros) posee coordenadas geográficas válidas dentro de Nueva York ($\text{lat} \in [40.49^\circ, 40.92^\circ]$, $\text{lon} \in [-74.27^\circ, -73.68^\circ]$), se creó el indicador booleano \texttt{coord\_valida} y se discretizó el territorio en cuadrículas uniformes de $0.01^\circ \times 0.01^\circ$ ($\approx 1.1\text{ km} \times 0.85\text{ km}$) usando funciones nativas de PySpark (\texttt{F.floor(lat * 100)}). Esto permitió realizar el cruce espacial entre colisiones y arrestos y entrenar los modelos de MLlib conservando el $100\%$ de los eventos válidamente georreferenciados sin depender de extensiones externas ni imputar artificialmente el condado en análisis administrativos.
+    \item \textbf{Imputación Jerárquica por Moda Condicionada (\texttt{Window.partitionBy}):} Para los $1,394$ registros de arrestos sin categoría penal válida en \texttt{LAW\_CAT\_CD}, en lugar de aplicar únicamente una moda global ciega, se calculó en PySpark la moda de \texttt{LAW\_CAT\_CD} dentro de cada código específico de delito (\texttt{PD\_CD}) mediante una ventana particionada, usando la moda global (\texttt{M}) solo como respaldo cuando el \texttt{PD\_CD} también era nulo. Además, se preservó la columna \texttt{gravedad\_reportada} sin imputar para garantizar total transparencia en las consultas descriptivas por gravedad.
+    \item \textbf{Codificación Explícita de Ausencia Estructural (\textit{Missing Indicators}):} En las columnas de los vehículos 3, 4 y 5 de colisiones se asignó la categoría explícita \texttt{SIN\_VEHICULO\_3}, \texttt{SIN\_VEHICULO\_4} y \texttt{SIN\_VEHICULO\_5}, y en las variables numéricas con salto lógico de la encuesta de pobreza (\texttt{ENG}, \texttt{JWTR}, \texttt{WKW}, \texttt{ESR}, \texttt{MSP}, \texttt{LANX}) se asignó el código centinela $-1$ (\textit{``no aplica''}), reduciendo a $0$ los valores nulos en dichas columnas.
+    \item \textbf{Estandarización de Separadores Numéricos y Filtrado de Integridad:} Se convirtieron las comas decimales y puntos de miles en coordenadas e importes monetarios mediante expresiones regulares distribuidas (\texttt{try\_cast(replace(...))}), descartando únicamente los $268$ registros de colisiones con llaves ausentes, duplicadas o conteos de víctimas aritméticamente imposibles.
+\end{enumerate}

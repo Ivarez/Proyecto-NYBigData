@@ -1,0 +1,156 @@
+\section{Entendimiento del Negocio}
+\label{sec:entendimiento_negocio}
+
+\subsection{Determinar los Objetivos del Negocio}
+
+\subsubsection{Contexto Institucional y Perfil del Cliente}
+
+El cliente del proyecto es el \textbf{Estado de Nueva York}, cuyos tomadores de decisiones requieren una solución analítica basada en datos que permita diagnosticar, relacionar y modelar indicadores territoriales críticos de la Ciudad de Nueva York. El estudio se concentra en la metrópoli y sus cinco condados (\textit{boroughs}), integrando registros oficiales de seguridad ciudadana, movilidad vial y determinantes socioeconómicos bajo la metodología estándar \textbf{CRISP-DM} \cite{crisp_dm_2000}.
+
+Entre las principales entidades institucionales cuyos objetivos estratégicos convergen en este proyecto se encuentran:
+
+\begin{itemize}
+    \item \textbf{Departamento de Policía de Nueva York (\textit{NYPD}):} Entidad responsable de la seguridad pública y fuente de los registros de detenciones (\textit{NYPD Arrest Data}) utilizados para la asignación táctica de patrullaje bajo el sistema \textit{CompStat} \cite{nypd_compstat_2024}.
+    
+    \item \textbf{Departamento de Transporte de Nueva York (\textit{NYC DOT}):} Entidad encargada de la infraestructura y la seguridad vial de la ciudad, líder de la iniciativa interinstitucional \textit{Vision Zero}, orientada a erradicar las muertes y lesiones graves asociadas a siniestros de tránsito \cite{vision_zero_nyc_2023}.
+    
+    \item \textbf{Oficina del Alcalde para la Oportunidad Económica (\textit{NYC Opportunity}):} Organismo responsable de medir y analizar las condiciones estructurales de pobreza e ingreso en la ciudad mediante la métrica propia \textit{NYCgov Poverty Measure} \cite{nyc_opportunity_2024}.
+\end{itemize}
+
+El equipo consultor ha sido convocado para diseñar y ejecutar una arquitectura de procesamiento de datos a gran escala (\textit{Big Data Analytics}) sobre \textbf{Apache Spark} y \textbf{Hadoop HDFS}, capaz de transformar estos repositorios masivos en evidencia cuantitativa y modelos de aprendizaje automático para respaldar la toma de decisiones públicas.
+
+\subsubsection{Objetivos de Negocio}
+
+De acuerdo con los lineamientos del gobierno de la ciudad, los principales indicadores de interés son la \textbf{cantidad y severidad de los arrestos} y la \textbf{frecuencia y letalidad de los accidentes de tránsito}. En consecuencia, se establecen tres objetivos de negocio principales:
+
+\begin{enumerate}
+    \item \textbf{Analizar los patrones de seguridad pública (\textit{Objetivo NYPD}):} Identificar patrones temporales (ciclo semanal y mensual), demográficos y territoriales (por condado, precinto y cuadrícula) relacionados con los arrestos por delitos graves y menores, con el fin de optimizar la asignación dinámica de recursos policiales.
+
+    \item \textbf{Analizar la siniestralidad vial y los factores de letalidad (\textit{Objetivo Vision Zero}):} Identificar las zonas, franjas horarias, tipos de vehículos y factores contribuyentes asociados con una mayor concentración de accidentes fatales o con afectación de actores viales vulnerables (peatones y ciclistas), aportando criterios objetivos para intervenciones de ingeniería vial y control de velocidad.
+
+    \item \textbf{Integrar determinantes socioeconómicos, de salud y ambientales (\textit{Objetivo NYC Opportunity}):} Incorporar variables de pobreza ponderada, desempleo, nivel educativo, incidencia de enfermedades crónicas por vecindario (PUMA) y condiciones meteorológicas diarias para evaluar integralmente su relación con la criminalidad y la siniestralidad vial.
+\end{enumerate}
+
+\subsubsection{Criterios de Éxito del Negocio}
+
+Desde la perspectiva de los tomadores de decisiones de Nueva York, la consultoría se considera exitosa al cumplir los siguientes criterios verificables:
+
+\begin{itemize}
+    \item Identifica y jerarquiza con precisión espacial las zonas calientes (\textit{hotspots}) de la ciudad que presentan simultáneamente alta concentración de arrestos y colisiones fatales.
+    \item Aísla los factores causales y tipologías vehiculares predominantes en siniestros que afectan a peatones y ciclistas, así como las diferencias horarias entre condados comerciales y residenciales.
+    \item Normaliza los indicadores por población estimada ($100,000$ habitantes) e integra fuentes externas mediante \textit{web scraping} y consumo de APIs climáticas.
+    \item Entrega modelos predictivos y de segmentación territorial en \textbf{Spark MLlib} cuyos resultados e interpretaciones orientan la priorización presupuestal e institucional en los cinco condados.
+\end{itemize}
+
+\subsection{Valoración de la Situación}
+
+\subsubsection{Diagnóstico Territorial y Contexto Macroeconómico de NYC}
+
+La Ciudad de Nueva York cuenta con una población estimada superior a $8.48$ millones de habitantes distribuidos en un territorio heterogéneo de $780\text{ km}^2$ \cite{us_census_quickfacts_nyc}. De acuerdo con el reporte económico del \textit{U.S. Bureau of Labor Statistics} (BLS) \cite{bls_nyc_2024}, la estructura socioeconómica y laboral presenta marcadas divergencias entre los cinco condados (\textit{boroughs}):
+
+\begin{itemize}
+    \item \textbf{Manhattan (\textit{New York County}):} Epicentro financiero y comercial con una densidad superior a $27,000\text{ hab/km}^2$ y una masiva población flotante diaria de trabajadores y turistas. Registra una tasa de desempleo cercana al $4.0\%$ y el nivel más alto de salarios promedio semanales de la metrópoli, superando los \$1,500 semanales \cite{bls_nyc_2024}.
+
+    \item \textbf{Brooklyn (\textit{Kings County}):} El condado más poblado ($\sim 2.6$ millones de habitantes), caracterizado por una extensa red de corredores arteriales con alta exposición peatonal. Su desempleo se ubica alrededor del $4.5\%$ y percibe salarios promedio semanales en el rango de \$1,300 a \$1,399 \cite{bls_nyc_2024}.
+
+    \item \textbf{Queens (\textit{Queens County}):} El más extenso geográficamente y de mayor diversidad demográfica, atravesado por autopistas de alto flujo y los aeropuertos JFK y LaGuardia. Presenta una tasa de desempleo cercana al $4.0\%$ y salarios semanales promedio de \$1,400 a \$1,499 \cite{bls_nyc_2024}.
+
+    \item \textbf{The Bronx (\textit{Bronx County}):} Territorio con históricos rezagos socioeconómicos y alta concentración de corredores de transporte pesado. Exhibe la tasa de desempleo más elevada de la ciudad ($6.1\%$ en los reportes recientes del BLS, y $9.56\%$ en la línea base de la encuesta municipal), con salarios promedio semanales en el rango de \$1,400 a \$1,499 \cite{bls_nyc_2024}.
+
+    \item \textbf{Staten Island (\textit{Richmond County}):} Condado de menor densidad y carácter marcadamente suburbano, con elevada dependencia del automóvil particular. Aunque mantiene un desempleo cercano al $4.0\%$, registra salarios promedio semanales de \$1,299 o menos en el empleo local \cite{bls_nyc_2024}.
+\end{itemize}
+
+En el plano de la vulnerabilidad social, los estudios de la Universidad de Columbia y la Fundación Robin Hood \cite{columbia_robinhood_2024}, en conjunto con la métrica \textit{NYCgov Poverty Measure} \cite{nyc_opportunity_2024}, evidencian que entre el $18\%$ y el $27\%$ de la población en condados como Brooklyn y el Bronx enfrenta privaciones económicas severas debido al elevado costo de la vivienda y el transporte \cite{osc_nyc_economy_2024}. Esta asimetría estructural exige que las políticas de seguridad pública y movilidad vial se diseñen de forma diferenciada según el perfil de cada territorio.
+
+\subsubsection{Inventario de Recursos}
+El equipo consultor dispuso de los siguientes activos analíticos e infraestructurales:
+\begin{itemize}
+    \item \textbf{Datos Abiertos Gubernamentales y Fuentes Externas:} Repositorios oficiales de \textit{NYC Open Data} (arrestos del NYPD, colisiones vehiculares del NYPD/DOT y microdatos de pobreza municipal), complementados con datos del \textit{NYS Cancer Registry} (vía \textit{web scraping}) y registros meteorológicos diarios (vía API REST).
+    \item \textbf{Infraestructura de Procesamiento Distribuido:} Clúster institucional \texttt{clusterHPC} con \textbf{Apache Spark v3.5.5} (\texttt{spark://10.195.34.34:7077}) y sistema de archivos distribuido \textbf{Hadoop HDFS} (\texttt{hdfs://10.195.34.34:9000}).
+    \item \textbf{Ecosistema Analítico:} Entorno distribuido en Python (\texttt{findspark}, \texttt{PySpark SQL}, \texttt{Spark MLlib}, \texttt{Pandas}, \texttt{SciPy}, \texttt{Matplotlib}) y documentación técnica en \LaTeX{}.
+\end{itemize}
+
+\subsubsection{Requisitos, Supuestos y Restricciones}
+\begin{itemize}
+    \item \textbf{Requisitos:} Desarrollar el ciclo completo CRISP-DM documentando al menos dos filtros y tres transformaciones justificadas, responder las ocho preguntas de negocio en conexión con los objetivos institucionales, preparar los datos para modelado (eliminación de correlacionadas, normalización y selección por criterio de negocio) y entrenar y evaluar modelos supervisados y no supervisados en \textbf{Spark MLlib} variando sus hiperparámetros.
+    \item \textbf{Supuestos:} Los registros oficiales provistos por el NYPD, el NYC DOT y \textit{NYC Opportunity} reflejan la distribución operativa de los eventos reportados, y los factores de expansión muestral (\texttt{PWGTP}) permiten estimar denominadores poblacionales representativos por condado.
+    \item \textbf{Restricciones:} Las fuentes presentan diferencias en su granularidad temporal y período de referencia (microdatos de pobreza de 2018 frente a colisiones históricas 2012--2026 y arrestos del primer semestre de 2026; ausencia de marca horaria en \texttt{ARREST\_DATE}), así como desbalance extremo en la clase de colisiones fatales ($\approx 0.25\%$), todo lo cual se mitiga explícitamente en la fase de preparación y modelado.
+\end{itemize}
+
+\subsubsection{Riesgos y Planes de Contingencia Ejecutados}
+\begin{itemize}
+    \item \textbf{Corrupción de registros por desplazamiento de campos en CSV masivos:} En la lectura preliminar del archivo de colisiones ($>2.3$ millones de filas) se detectaron desplazamientos de texto que generaban valores espurios (como $3,291,249$ ciclistas heridos). \textit{Contingencia aplicada:} Lectura con opciones \texttt{multiLine}, \texttt{quote} y \texttt{escape}, conversión segura con \texttt{try\_cast} y filtro de coherencia aritmética entre subcategorías y totales.
+    \item \textbf{Ausencia de etiquetas administrativas de condado (\texttt{BOROUGH}) en colisiones ($29.27\%$):} \textit{Contingencia aplicada:} Creación del indicador de validación geoespacial \texttt{coord\_valida} dentro de la caja delimitadora de NYC y discretización espacial en cuadrículas uniformes de $0.01^\circ \times 0.01^\circ$ en PySpark, permitiendo aprovechar la totalidad de registros con coordenadas válidas ($89.19\%$) sin pérdida en el análisis espacial ni en los modelos de MLlib.
+    \item \textbf{Restricciones de cuota o clave en APIs externas y dashboards dinámicos:} \textit{Contingencia aplicada:} Extracción automatizada del endpoint CSV subyacente en Tableau Public con caché local para las tasas de salud por PUMA, e integración de \textit{Open-Meteo Historical API} como respaldo determinístico de \textit{OpenWeather}.
+\end{itemize}
+
+\subsection{Determinar los Objetivos de Minería de Datos}
+
+\subsubsection{Metas de Minería de Datos}
+
+Para traducir los objetivos de negocio en tareas computacionales concretas, se establecieron las siguientes metas de minería de datos:
+
+\begin{enumerate}
+    \item \textbf{Pipeline Distribuido de Ingesta, Filtrado y Transformación (ETL) en PySpark:} Implementar un flujo reproducible sobre el clúster Spark que depure llaves duplicadas e incoherencias numéricas, armonice catálogos territoriales, impute nulos mediante funciones de ventana (\texttt{Window.partitionBy}) y calcule tasas estandarizadas por $100,000$ habitantes.
+    \item \textbf{Resolución Analítica de Preguntas de Negocio:} Ejecutar agregaciones distribuidas, pruebas de correlación de Pearson (\texttt{pearsonr}), cruces por cuadrícula espacial (\texttt{percent\_rank}) y perfiles demográficos por ventana para responder con rigor estadístico las ocho preguntas directrices.
+    \item \textbf{Modelado Supervisado de Fatalidad Vial en Spark MLlib:} Formular un problema de clasificación binaria desbalanceada ($\text{fatal} \in \{0, 1\}$) empleando \texttt{LogisticRegression} con ponderación de clases (\texttt{weightCol}), partición temporal estricta (entrenamiento en 2024, validación en 2025 y prueba en 2026) y búsqueda de hiperparámetros (\texttt{regParam} y umbral de decisión $\tau$).
+    \item \textbf{Segmentación Territorial No Supervisada en Spark MLlib:} Construir perfiles multivariados por cuadrícula urbana ($0.01^\circ \times 0.01^\circ$) y aplicar el algoritmo \texttt{KMeans} evaluando múltiples valores de $k \in \{2, 3, 4\}$ para clasificar las zonas de la ciudad según su carga conjunta de siniestralidad, arrestos, nocturnidad y afectación a vulnerables.
+    \item \textbf{Modelado No Lineal mediante Aprendizaje Profundo Distribuido (Bono):} Entrenar y evaluar un Perceptrón Multicapa (\texttt{MultilayerPerceptronClassifier}) sobre Spark MLlib explorando tres arquitecturas profundas y dos regímenes de iteraciones L-BFGS para capturar interacciones complejas entre ubicación, hora, vehículo y factor contribuyente.
+\end{enumerate}
+
+\subsubsection{Criterios de Éxito de Minería de Datos}
+
+\begin{itemize}
+    \item Ejecución íntegra del pipeline de datos y de los algoritmos de aprendizaje automático sobre el clúster \texttt{spark://10.195.34.34:7077}.
+    \item Verificación cuantitativa de multicolinealidad mediante matrices de correlación de Pearson en MLlib ($|r| < 0.90$) y escalamiento estandarizado (\texttt{StandardScaler}) sin fuga de datos entre particiones temporales.
+    \item Evaluación rigurosa del clasificador supervisado y de la red neuronal frente a métricas sensibles al desbalance extremo: área bajo la curva Precisión--Recall (\textbf{AUPRC}) contrastada con la prevalencia base ($0.0025$), área bajo la curva ROC (\textbf{AUROC}), precisión, exhaustividad (\textit{recall}) y puntaje \textbf{F1}.
+    \item Selección óptima del número de clústeres territoriales en \textbf{K-Means} maximizando el coeficiente de \textbf{Silhouette} con distancia euclídea al cuadrado.
+\end{itemize}
+
+\subsection{Plan del Proyecto según las Fases de CRISP-DM}
+
+La Tabla \ref{tab:plan_crispdm} sintetiza la articulación completa del proyecto a través de las seis fases de la metodología CRISP-DM y su correspondencia con las secciones del presente informe final:
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{p{3.6cm} p{3.8cm} X}
+\toprule
+\textbf{Fase CRISP-DM} & \textbf{Secciones del Informe} & \textbf{Alcance y Entregables} \\
+\midrule
+I. Entendimiento del Negocio & Sección \ref{sec:entendimiento_negocio} & Objetivos institucionales (NYPD, Vision Zero, NYC Opportunity), diagnóstico macroeconómico por condado y metas de minería. \\
+II. Entendimiento de los Datos & Secciones \ref{sec:seleccion_datos}, \ref{sec:coleccion_descripcion}, \ref{sec:exploracion_datos}, \ref{sec:reporte_calidad} y \ref{sec:preguntas_negocio} & Selección justificada de fuentes, arquitectura del clúster Spark/HDFS, descripción de esquemas, 9 análisis EDA, reporte de calidad y 8 preguntas de negocio. \\
+III. Preparación de los Datos & Secciones \ref{sec:limpieza_transformacion}, \ref{sec:bonos} y \ref{subsec:prep_modelado_num4} & Numeral 1 (4 filtros y 6 transformaciones finales), integración de fuentes externas (Web Scraping y API climática) y Numeral 4 (4.a correlación, 4.b normalización y 4.c selección de variables). \\
+IV. Modelado & Secciones \ref{subsec:seleccion_tecnicas_num3}, \ref{subsec:aplicacion_mllib_num5} y \ref{sec:bono_dl} & Numeral 3 (justificación de técnicas) y Numeral 5 (entrenamiento distribuido de Regresión Logística, K-Means y Perceptrón Multicapa en MLlib). \\
+V. Evaluación & Secciones \ref{sec:respuestas_preguntas}, \ref{subsec:evaluacion_modelos_num6} y \ref{sec:bono_dl} & Numeral 2 (respuesta cuantitativa a las preguntas de negocio) y Numeral 6 (evaluación paramétrica con AUPRC, AUROC, F1 y Silhouette). \\
+VI. Despliegue & Sección \ref{sec:conclusiones_recomendaciones} & Hoja de ruta ejecutiva y recomendaciones de política pública para la Alcaldía y el Estado de Nueva York. \\
+\bottomrule
+\end{tabularx}
+\caption{Trazabilidad metodológica del proyecto bajo el estándar CRISP-DM.}
+\label{tab:plan_crispdm}
+\end{table}
+
+\subsubsection{Infraestructura y Herramientas Tecnológicas}
+
+La Tabla \ref{tab:tecnologias} detalla la pila tecnológica empleada durante el desarrollo del proyecto:
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{p{3.8cm} p{4.2cm} X}
+\toprule
+\textbf{Componente} & \textbf{Herramienta / Tecnología} & \textbf{Función en el Proyecto} \\
+\midrule
+Motor de Procesamiento & Apache Spark v3.5.5 / PySpark & Cómputo distribuido en memoria sobre el clúster \texttt{clusterHPC} (\texttt{spark://10.195.34.34:7077}). \\
+Almacenamiento Distribuido & Hadoop HDFS & Almacenamiento distribuido en el NameNode \texttt{hdfs://10.195.34.34:9000}. \\
+Aprendizaje Automático & Spark MLlib (\texttt{pyspark.ml}) & Pipelines de transformación, correlación, Regresión Logística, K-Means y Perceptrón Multicapa (MLP). \\
+Análisis Estadístico \& Visual & Pandas, SciPy, Matplotlib & Pruebas de correlación, agregación local de resúmenes y visualización científica de alta resolución. \\
+Ingesta Externa & Requests, Tableau CSV, Open-Meteo / OpenWeather & Extracción automatizada vía \textit{Web Scraping} y consumo de APIs meteorológicas con caché local. \\
+Documentación \& Control & \LaTeX{} (Overleaf), BibTeX \& Git/GitHub & Redacción académica modular, referencias IEEE y control de versiones del repositorio. \\
+\bottomrule
+\end{tabularx}
+\caption{Matriz de herramientas y tecnologías implementadas en el proyecto.}
+\label{tab:tecnologias}
+\end{table}

@@ -1,0 +1,34 @@
+# Ignorar datasets CSV masivos (>100 MB límite de GitHub)
+*.csv
+Proyecto/*.csv
+
+# Archivos temporales y notas de trabajo local
+Conversación compañeros.txt
+Documento entrega 1.txt
+documento entrega 1.tex
+Notas.txt
+DiazCastroStroke.ipynb
+Bono_Aprendizaje_Profundo.pdf
+
+# Entornos y cachés de Python / Jupyter / Spark
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+spark-warehouse/
+metastore_db/
+derby.log
+
+# Archivos auxiliares de compilación LaTeX
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
