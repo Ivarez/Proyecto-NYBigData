@@ -1,14 +1,19 @@
 # Ignorar datasets CSV masivos (>100 MB límite de GitHub)
 *.csv
 Proyecto/*.csv
+RecursosLatex/*.csv
 
-# Archivos temporales y notas de trabajo local
+# Archivos temporales, notas locales y ejemplos de referencia
 Conversación compañeros.txt
+*Conversaci*
 Documento entrega 1.txt
 documento entrega 1.tex
 Notas.txt
 DiazCastroStroke.ipynb
 Bono_Aprendizaje_Profundo.pdf
+EDA_NY_Project_F_con_bono_DL.ipynb
+Proyecto/
+Proyecto/*
 
 # Entornos y cachés de Python / Jupyter / Spark
 __pycache__/
