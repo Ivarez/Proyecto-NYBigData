@@ -37,32 +37,32 @@ Sobre el clúster académico de **Apache Spark v3.5.5** (`spark://10.195.34.34:7
 ## 2. Estructura del Repositorio
 
 ```text
-├── EDA_NY_Project_F_con_bono_DL.ipynb          # Cuaderno principal completo (Fases II a V CRISP-DM + Bonos)
-├── Presentacion_Ejecutiva_15min.md             # Estructura y guion de la sustentación ejecutiva (15 min)
-├── README.md                                   # Documentación general del repositorio
-├── .gitignore                                  # Reglas de exclusión de archivos pesados (>100 MB)
-└── Proyecto/
-    ├── EDA_Numeral4_NY_Project_F.ipynb         # Copia sincronizada del cuaderno en la carpeta de proyecto
-    ├── DatosNY.zip                             # Paquete LaTeX listo para importar directamente en Overleaf
-    └── DatosNY/                                # Código fuente modular del informe técnico en LaTeX
-        ├── main.tex                            # Archivo maestro LaTeX (compilación modular)
-        ├── main_completo_overleaf.tex          # Versión unificada en un solo archivo .tex para Overleaf
-        ├── referencias.bib                     # Bibliografía en formato BibTeX (IEEEtran)
-        ├── logoPUJ.png                         # Escudo institucional PUJ
-        ├── imagenes/                           # Figuras generadas por el pipeline en Spark
-        └── secciones/
-            ├── 01_entendimiento_negocio.tex        # Fase I CRISP-DM: Objetivos de negocio y minería
-            ├── 02_seleccion_datos.tex              # Fase II CRISP-DM: Selección y justificación de fuentes
-            ├── 03_coleccion_descripcion.tex        # Arquitectura del clúster Spark/HDFS y diccionarios
-            ├── 04_exploracion_datos.tex            # 9 elementos de análisis exploratorio (EDA)
-            ├── 05_reporte_calidad.tex              # Diagnóstico de nulos y estrategias de tratamiento
-            ├── 06_preguntas_negocio.tex            # Formulación de las 8 preguntas directrices
-            ├── 07_limpieza_transformacion.tex      # Fase III — Numeral 1: 4 filtros y 6 transformaciones
-            ├── 08_bonos.tex                        # Bonos: Web Scraping (PUMA) y API Climática en Spark
-            ├── 09_respuestas_preguntas_negocio.tex # Numeral 2: Respuestas cuantitativas a preguntas 1–7
-            ├── 10_modelado_evaluacion_mllib.tex    # Numerales 3, 4 (a,b,c), 5, 6 y Pregunta 8 en MLlib
-            ├── 11_bono_aprendizaje_profundo.tex    # Bono Entrega Final: Perceptrón Multicapa (MLP) en MLlib
-            └── 12_conclusiones_recomendaciones.tex # Fase VI CRISP-DM: Recomendaciones para Nueva York
+├── ProyectoNYFinal.pdf                         # Documento final del informe de consultoría compilado
+├── Notebook_Principal_NYC_BigData_con_DL.ipynb # Cuaderno principal Spark MLlib + Bono Deep Learning (MLP)
+├── Notebook_Analisis_Exploratorio_EDA.ipynb    # Cuaderno de análisis exploratorio (EDA, Spark SQL y preguntas)
+├── Presentacion_Ejecutiva_15min.md             # Estructura y guion para sustentación ejecutiva (15 min)
+├── README.md                                   # Documentación integral del proyecto
+├── .gitignore                                  # Exclusión de datasets masivos (>100 MB) y archivos temporales
+└── RecursosLatex/                              # Paquete completo de fuentes LaTeX para Overleaf
+    ├── RecursosLatex_Overleaf.zip              # Archivo comprimido listo para importar directo en Overleaf
+    ├── main.tex                                # Archivo maestro modular
+    ├── main_completo_overleaf.tex              # Versión unificada en un solo archivo para Overleaf
+    ├── referencias.bib                         # Bibliografía académica en formato BibTeX
+    ├── logoPUJ.png                             # Escudo institucional Pontificia Universidad Javeriana
+    ├── imagenes/                               # 41 figuras de alta resolución generadas por el pipeline Spark
+    └── secciones/                              # Capítulos y fases metodológicas estructuradas
+        ├── 01_entendimiento_negocio.tex        # Fase I: Entendimiento del Negocio
+        ├── 02_seleccion_datos.tex              # Fase II: Selección y Justificación de Fuentes
+        ├── 03_coleccion_descripcion.tex        # Arquitectura del clúster Spark/HDFS y Diccionarios
+        ├── 04_exploracion_datos.tex            # Análisis Exploratorio de Datos (EDA)
+        ├── 05_reporte_calidad.tex              # Diagnóstico y Tratamiento de Calidad de Datos
+        ├── 06_preguntas_negocio.tex            # Formulación de Preguntas Directrices de Negocio
+        ├── 07_limpieza_transformacion.tex      # Fase III: Limpieza y Transformación en Spark
+        ├── 08_bonos.tex                        # Bonos: Web Scraping (PUMA) y API Climática en Spark
+        ├── 09_respuestas_preguntas_negocio.tex # Respuestas Cuantitativas a Preguntas de Negocio
+        ├── 10_modelado_evaluacion_mllib.tex    # Fase IV y V: Modelado Predictivo y Clustering en MLlib
+        ├── 11_bono_aprendizaje_profundo.tex    # Bono: Redes Neuronales Artificiales (MLP) en MLlib
+        └── 12_conclusiones_recomendaciones.tex # Fase VI: Plan de Acción y Recomendaciones de Negocio
 ```
 
 ---
